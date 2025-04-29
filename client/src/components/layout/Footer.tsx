@@ -7,8 +7,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="md:flex md:justify-between">
           <div className="mb-6 md:mb-0">
-            <Link href="/">
-              <a className="font-heading text-xl font-bold">SHARP CUTS</a>
+            <Link href="/" className="font-heading text-xl font-bold">
+              SHARP CUTS
             </Link>
             <p className="mt-2 text-sm text-gray-300">Premium barbershop services since 2015</p>
           </div>
@@ -18,18 +18,18 @@ export default function Footer() {
               <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Quick Links</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/">
-                    <a className="text-gray-300 hover:text-accent transition-colors duration-200">Home</a>
+                  <Link href="/" className="text-gray-300 hover:text-accent transition-colors duration-200">
+                    Home
                   </Link>
                 </li>
                 <li>
-                  <Link href="/booking">
-                    <a className="text-gray-300 hover:text-accent transition-colors duration-200">Book Now</a>
+                  <Link href="/booking" className="text-gray-300 hover:text-accent transition-colors duration-200">
+                    Book Now
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact">
-                    <a className="text-gray-300 hover:text-accent transition-colors duration-200">Contact</a>
+                  <Link href="/contact" className="text-gray-300 hover:text-accent transition-colors duration-200">
+                    Contact
                   </Link>
                 </li>
               </ul>
@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-8 pt-8 border-t border-gray-700 md:flex md:items-center md:justify-between">
-          <p className="text-sm text-gray-300">&copy; 2023 Sharp Cuts. All rights reserved.</p>
+          <p className="text-sm text-gray-300">&copy; {new Date().getFullYear()} Sharp Cuts. All rights reserved.</p>
           <div className="mt-4 md:mt-0">
             <ul className="flex space-x-6">
               <li>

@@ -67,6 +67,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the request body
       const validatedData = bookingSchema.parse(req.body);
       
+      // Check if the selected date is a working day (Tuesday-Saturday)
+      const dateObj = new Date(validatedData.date);
+      const dayOfWeek = dateObj.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const workingDays = [2, 3, 4, 5, 6]; // Tuesday through Saturday
+      
+      if (!workingDays.includes(dayOfWeek)) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected date is not a working day. We are open Tuesday through Saturday."
+        });
+      }
+      
+      // Check if the selected time is during working hours (10:00 AM to 5:00 PM)
+      const workingHours = ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+      
+      if (!workingHours.includes(validatedData.time)) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected time is outside working hours. We are open from 10:00 AM to 5:00 PM."
+        });
+      }
+      
       // Check if the selected time slot is available
       const isAvailable = await storage.isTimeSlotAvailable(validatedData.date, validatedData.time);
       
@@ -159,6 +181,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.get("/bookings/slots/:date", async (req, res) => {
     try {
       const date = req.params.date;
+      
+      // Check if the selected date is a working day (Tuesday-Saturday)
+      const dateObj = new Date(date);
+      const dayOfWeek = dateObj.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const workingDays = [2, 3, 4, 5, 6]; // Tuesday through Saturday
+      
+      if (!workingDays.includes(dayOfWeek)) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected date is not a working day. We are open Tuesday through Saturday."
+        });
+      }
+      
       const bookedSlots = await storage.getBookedTimeSlots(date);
       
       return res.status(200).json({
@@ -183,6 +218,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({
           success: false,
           message: "Both date and time parameters are required"
+        });
+      }
+      
+      // Check if the selected date is a working day (Tuesday-Saturday)
+      const dateObj = new Date(date as string);
+      const dayOfWeek = dateObj.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const workingDays = [2, 3, 4, 5, 6]; // Tuesday through Saturday
+      
+      if (!workingDays.includes(dayOfWeek)) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected date is not a working day. We are open Tuesday through Saturday."
+        });
+      }
+      
+      // Check if the selected time is during working hours (10:00 AM to 5:00 PM)
+      const workingHours = ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+      
+      if (!workingHours.includes(time as string)) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected time is outside working hours. We are open from 10:00 AM to 5:00 PM."
         });
       }
       

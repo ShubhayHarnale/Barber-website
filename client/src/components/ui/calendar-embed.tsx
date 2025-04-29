@@ -25,10 +25,13 @@ export function CalendarEmbed() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
   
-  // All available time slots
+  // Barber's working days (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+  const workingDays = [2, 3, 4, 5, 6]; // Tuesday through Saturday
+  
+  // Barber's working hours (10:00 AM to 5:00 PM)
   const allTimeSlots = [
-    "9:00", "10:00", "11:00", "12:00", "13:00",
-    "14:00", "15:00", "16:00", "17:00", "18:00"
+    "10:00", "11:00", "12:00", "13:00",
+    "14:00", "15:00", "16:00", "17:00"
   ];
   
   // Fetch booked time slots when date changes
@@ -126,6 +129,10 @@ export function CalendarEmbed() {
             <Calendar className="w-12 h-12 mx-auto mb-4 text-secondary" />
             <h3 className="font-heading text-xl font-bold mb-2">Select a Date</h3>
             <p className="text-gray-600 mb-4">Choose a date for your appointment</p>
+            <div className="text-sm bg-muted/50 rounded-md p-3 text-muted-foreground">
+              <p><span className="font-medium">Working days:</span> Tuesday through Saturday</p>
+              <p><span className="font-medium">Working hours:</span> 10:00 AM to 5:00 PM</p>
+            </div>
           </div>
 
           <div className="flex justify-center">
@@ -133,7 +140,17 @@ export function CalendarEmbed() {
               mode="single"
               selected={date}
               onSelect={handleDateChange}
-              disabled={(date) => date < new Date() || date > new Date(new Date().setMonth(new Date().getMonth() + 2))}
+              disabled={(date) => {
+                // Disable dates in the past
+                if (date < new Date()) return true;
+                
+                // Disable dates more than 2 months in the future
+                if (date > new Date(new Date().setMonth(new Date().getMonth() + 2))) return true;
+                
+                // Disable days that are not working days (Tuesday-Saturday)
+                const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                return !workingDays.includes(dayOfWeek);
+              }}
               className="rounded-md border"
             />
           </div>
@@ -230,11 +247,9 @@ export function CalendarEmbed() {
                         value={timeSlot}
                         disabled={bookedTimeSlots.includes(timeSlot)}
                       >
-                        {timeSlot.includes(":") ? (
-                          parseInt(timeSlot) < 12 
-                            ? `${timeSlot} AM` 
-                            : `${parseInt(timeSlot) === 12 ? 12 : parseInt(timeSlot) - 12}:00 PM`
-                        ) : timeSlot}
+                        {parseInt(timeSlot) < 12 
+                          ? `${timeSlot} AM` 
+                          : `${parseInt(timeSlot) === 12 ? '12:00' : (parseInt(timeSlot) - 12) + ':00'} PM`}
                         {bookedTimeSlots.includes(timeSlot) && " (Booked)"}
                       </SelectItem>
                     ))}

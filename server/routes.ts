@@ -7,8 +7,12 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Create a dedicated router for API endpoints to ensure they take precedence
+  const apiRouter = express.Router();
+  app.use('/api', apiRouter);
+  
   // API endpoint to handle contact form submissions
-  app.post("/api/contact", async (req, res) => {
+  apiRouter.post("/contact", async (req, res) => {
     try {
       // Validate the request body
       const validatedData = contactMessageSchema.parse(req.body);
@@ -41,7 +45,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all contact messages (could be used for admin purposes)
-  app.get("/api/contact", async (req, res) => {
+  apiRouter.get("/contact", async (req, res) => {
     try {
       const messages = await storage.getAllContactMessages();
       return res.status(200).json({
@@ -58,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // API endpoint to handle booking submissions
-  app.post("/api/bookings", async (req, res) => {
+  apiRouter.post("/bookings", async (req, res) => {
     try {
       // Validate the request body
       const validatedData = bookingSchema.parse(req.body);
@@ -91,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all bookings (for admin purposes)
-  app.get("/api/bookings", async (req, res) => {
+  apiRouter.get("/bookings", async (req, res) => {
     try {
       const bookings = await storage.getAllBookings();
       return res.status(200).json({

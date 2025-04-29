@@ -132,7 +132,7 @@ export function CalendarEmbed() {
             <CalendarUI
               mode="single"
               selected={date}
-              onSelect={setDate}
+              onSelect={handleDateChange}
               disabled={(date) => date < new Date() || date > new Date(new Date().setMonth(new Date().getMonth() + 2))}
               className="rounded-md border"
             />
@@ -167,6 +167,14 @@ export function CalendarEmbed() {
           </DialogHeader>
           
           <div className="space-y-4 py-4">
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
+          
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input 
@@ -205,32 +213,55 @@ export function CalendarEmbed() {
             
             <div className="space-y-2">
               <Label htmlFor="time">Preferred Time</Label>
-              <Select value={time} onValueChange={setTime}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a time" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="9:00">9:00 AM</SelectItem>
-                  <SelectItem value="10:00">10:00 AM</SelectItem>
-                  <SelectItem value="11:00">11:00 AM</SelectItem>
-                  <SelectItem value="12:00">12:00 PM</SelectItem>
-                  <SelectItem value="13:00">1:00 PM</SelectItem>
-                  <SelectItem value="14:00">2:00 PM</SelectItem>
-                  <SelectItem value="15:00">3:00 PM</SelectItem>
-                  <SelectItem value="16:00">4:00 PM</SelectItem>
-                  <SelectItem value="17:00">5:00 PM</SelectItem>
-                  <SelectItem value="18:00">6:00 PM</SelectItem>
-                </SelectContent>
-              </Select>
+              {loading ? (
+                <div className="flex items-center justify-center py-2">
+                  <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full mr-2" />
+                  <span className="text-sm text-muted-foreground">Loading available times...</span>
+                </div>
+              ) : (
+                <Select value={time} onValueChange={setTime}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allTimeSlots.map(timeSlot => (
+                      <SelectItem 
+                        key={timeSlot} 
+                        value={timeSlot}
+                        disabled={bookedTimeSlots.includes(timeSlot)}
+                      >
+                        {timeSlot.includes(":") ? (
+                          parseInt(timeSlot) < 12 
+                            ? `${timeSlot} AM` 
+                            : `${parseInt(timeSlot) === 12 ? 12 : parseInt(timeSlot) - 12}:00 PM`
+                        ) : timeSlot}
+                        {bookedTimeSlots.includes(timeSlot) && " (Booked)"}
+                      </SelectItem>
+                    ))}
+                    {allTimeSlots.length === bookedTimeSlots.length && (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                        No times available. Please select another date.
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
           
           <DialogFooter>
             <Button 
               onClick={handleBook} 
-              disabled={!name || !email || !service || !time}
+              disabled={!name || !email || !service || !time || bookingInProgress}
             >
-              Book Appointment
+              {bookingInProgress ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
+                  Processing...
+                </>
+              ) : (
+                "Book Appointment"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

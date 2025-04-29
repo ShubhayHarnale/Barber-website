@@ -67,6 +67,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the request body
       const validatedData = bookingSchema.parse(req.body);
       
+      // Check if the selected time slot is available
+      const isAvailable = await storage.isTimeSlotAvailable(validatedData.date, validatedData.time);
+      
+      if (!isAvailable) {
+        return res.status(409).json({
+          success: false,
+          message: "This time slot is no longer available. Please select another time.",
+        });
+      }
+      
       // Store the booking
       const booking = await storage.createBooking(validatedData);
       
@@ -107,6 +117,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({
         success: false,
         message: "An error occurred while retrieving bookings"
+      });
+    }
+  });
+  
+  // Delete a booking
+  apiRouter.delete("/bookings/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid booking ID format"
+        });
+      }
+      
+      const deleted = await storage.deleteBooking(id);
+      
+      if (!deleted) {
+        return res.status(404).json({
+          success: false,
+          message: "Booking not found"
+        });
+      }
+      
+      return res.status(200).json({
+        success: true,
+        message: "Booking deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while deleting the booking"
+      });
+    }
+  });
+  
+  // Get booked time slots for a specific date
+  apiRouter.get("/bookings/slots/:date", async (req, res) => {
+    try {
+      const date = req.params.date;
+      const bookedSlots = await storage.getBookedTimeSlots(date);
+      
+      return res.status(200).json({
+        success: true,
+        data: bookedSlots
+      });
+    } catch (error) {
+      console.error("Error retrieving booked time slots:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while retrieving booked time slots"
+      });
+    }
+  });
+  
+  // Check if a specific time slot is available
+  apiRouter.get("/bookings/availability", async (req, res) => {
+    try {
+      const { date, time } = req.query;
+      
+      if (!date || !time) {
+        return res.status(400).json({
+          success: false,
+          message: "Both date and time parameters are required"
+        });
+      }
+      
+      const isAvailable = await storage.isTimeSlotAvailable(date as string, time as string);
+      
+      return res.status(200).json({
+        success: true,
+        available: isAvailable
+      });
+    } catch (error) {
+      console.error("Error checking time slot availability:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while checking time slot availability"
       });
     }
   });

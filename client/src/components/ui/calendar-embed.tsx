@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
+import { Calendar, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function CalendarEmbed() {
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -17,9 +19,61 @@ export function CalendarEmbed() {
   const [service, setService] = useState("haircut");
   const [time, setTime] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [bookedTimeSlots, setBookedTimeSlots] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [bookingInProgress, setBookingInProgress] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { toast } = useToast();
+  
+  // All available time slots
+  const allTimeSlots = [
+    "9:00", "10:00", "11:00", "12:00", "13:00",
+    "14:00", "15:00", "16:00", "17:00", "18:00"
+  ];
+  
+  // Fetch booked time slots when date changes
+  useEffect(() => {
+    const fetchBookedTimeSlots = async () => {
+      if (!date) return;
+      
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        const formattedDate = format(date, "PPP");
+        const response = await fetch(`/api/bookings/slots/${encodeURIComponent(formattedDate)}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setBookedTimeSlots(data.data);
+          setTime(""); // Reset time selection when date changes
+        } else {
+          console.error("Error fetching booked time slots:", data.message);
+          setErrorMessage("Unable to load available times. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error fetching booked time slots:", error);
+        setErrorMessage("Unable to load available times. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (date) {
+      fetchBookedTimeSlots();
+    }
+  }, [date]);
+  
+  // Handle date change
+  const handleDateChange = (newDate: Date | undefined) => {
+    setDate(newDate);
+    setTime("");
+  };
 
   const handleBook = async () => {
     if (!date) return;
+    
+    setBookingInProgress(true);
+    setErrorMessage(null);
     
     try {
       const response = await fetch('/api/bookings', {
@@ -42,13 +96,25 @@ export function CalendarEmbed() {
         setSubmitted(true);
         setOpen(false);
         console.log("Booking created with ID:", data.data.id);
+        toast({
+          title: "Booking Confirmed",
+          description: "Your appointment has been successfully booked!",
+        });
       } else {
         console.error("Error creating booking:", data.message);
-        alert("There was an error saving your booking. Please try again.");
+        setErrorMessage(data.message || "There was an error saving your booking. Please try again.");
+        
+        // If time slot is no longer available, update booked slots
+        if (response.status === 409) {
+          setBookedTimeSlots(prev => [...prev, time]);
+          setTime("");
+        }
       }
     } catch (error) {
       console.error("Error submitting booking:", error);
-      alert("There was an error saving your booking. Please try again.");
+      setErrorMessage("There was an error saving your booking. Please try again.");
+    } finally {
+      setBookingInProgress(false);
     }
   };
 

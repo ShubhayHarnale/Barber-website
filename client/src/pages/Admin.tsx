@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Booking {
   id: number;
@@ -17,28 +20,70 @@ export default function Admin() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const { toast } = useToast();
+
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/bookings');
+      const data = await response.json();
+      
+      if (data.success) {
+        setBookings(data.data);
+        setError(null);
+      } else {
+        setError(data.message || 'Failed to fetch bookings');
+      }
+    } catch (err) {
+      setError('An error occurred while fetching bookings');
+      console.error('Error fetching bookings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const response = await fetch('/api/bookings');
-        const data = await response.json();
-        
-        if (data.success) {
-          setBookings(data.data);
-        } else {
-          setError(data.message || 'Failed to fetch bookings');
-        }
-      } catch (err) {
-        setError('An error occurred while fetching bookings');
-        console.error('Error fetching bookings:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBookings();
   }, []);
+  
+  const handleDeleteBooking = async (id: number) => {
+    try {
+      setDeletingId(id);
+      const response = await fetch(`/api/bookings/${id}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Remove the booking from the state instead of refreshing the entire list
+        setBookings(currentBookings => 
+          currentBookings.filter(booking => booking.id !== id)
+        );
+        
+        toast({
+          title: "Booking deleted",
+          description: "The booking has been successfully deleted.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to delete booking",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      toast({
+        title: "Error",
+        description: "An error occurred while deleting the booking",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   // Function to get human-readable service names
   const getServiceName = (serviceId: string): string => {
@@ -105,6 +150,7 @@ export default function Admin() {
                     <TableHead>Date</TableHead>
                     <TableHead>Time</TableHead>
                     <TableHead>Submitted At</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -116,6 +162,22 @@ export default function Admin() {
                       <TableCell>{formatDate(booking.date)}</TableCell>
                       <TableCell>{booking.time}</TableCell>
                       <TableCell>{formatTimestamp(booking.createdAt)}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteBooking(booking.id)}
+                          disabled={deletingId === booking.id}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          {deletingId === booking.id ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">Delete booking</span>
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

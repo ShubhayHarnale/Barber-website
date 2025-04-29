@@ -19,6 +19,9 @@ export interface IStorage {
   createBooking(booking: BookingInput): Promise<Booking>;
   getBooking(id: number): Promise<Booking | undefined>;
   getAllBookings(): Promise<Booking[]>;
+  deleteBooking(id: number): Promise<boolean>;
+  isTimeSlotAvailable(date: string, time: string): Promise<boolean>;
+  getBookedTimeSlots(date: string): Promise<string[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -109,6 +112,29 @@ export class MemStorage implements IStorage {
       const dateB = b.createdAt instanceof Date ? b.createdAt : new Date();
       return dateB.getTime() - dateA.getTime();
     });
+  }
+  
+  async deleteBooking(id: number): Promise<boolean> {
+    return this.bookings.delete(id);
+  }
+  
+  async isTimeSlotAvailable(date: string, time: string): Promise<boolean> {
+    // Check if there are any bookings for the given date and time
+    const bookingsForSlot = Array.from(this.bookings.values()).find(
+      (booking) => booking.date === date && booking.time === time
+    );
+    
+    // If no booking is found for this date/time slot, it's available
+    return !bookingsForSlot;
+  }
+  
+  async getBookedTimeSlots(date: string): Promise<string[]> {
+    // Find all bookings for the given date and return their time slots
+    const bookedSlots = Array.from(this.bookings.values())
+      .filter((booking) => booking.date === date)
+      .map((booking) => booking.time);
+    
+    return bookedSlots;
   }
 }
 

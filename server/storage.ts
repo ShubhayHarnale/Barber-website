@@ -1,6 +1,7 @@
 import { 
   users, type User, type InsertUser, 
-  contactMessages, type ContactMessage, type ContactMessageInput 
+  contactMessages, type ContactMessage, type ContactMessageInput,
+  bookings, type Booking, type BookingInput
 } from "@shared/schema";
 
 // Interface for storage methods
@@ -13,19 +14,28 @@ export interface IStorage {
   createContactMessage(message: ContactMessageInput): Promise<ContactMessage>;
   getContactMessage(id: number): Promise<ContactMessage | undefined>;
   getAllContactMessages(): Promise<ContactMessage[]>;
+  
+  // Booking methods
+  createBooking(booking: BookingInput): Promise<Booking>;
+  getBooking(id: number): Promise<Booking | undefined>;
+  getAllBookings(): Promise<Booking[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private messages: Map<number, ContactMessage>;
+  private bookings: Map<number, Booking>;
   private userCurrentId: number;
   private messageCurrentId: number;
+  private bookingCurrentId: number;
 
   constructor() {
     this.users = new Map();
     this.messages = new Map();
+    this.bookings = new Map();
     this.userCurrentId = 1;
     this.messageCurrentId = 1;
+    this.bookingCurrentId = 1;
   }
 
   // User methods
@@ -67,6 +77,33 @@ export class MemStorage implements IStorage {
 
   async getAllContactMessages(): Promise<ContactMessage[]> {
     return Array.from(this.messages.values()).sort((a, b) => {
+      // Sort by createdAt in descending order (newest first)
+      const dateA = a.createdAt instanceof Date ? a.createdAt : new Date();
+      const dateB = b.createdAt instanceof Date ? b.createdAt : new Date();
+      return dateB.getTime() - dateA.getTime();
+    });
+  }
+  
+  // Booking methods
+  async createBooking(bookingData: BookingInput): Promise<Booking> {
+    const id = this.bookingCurrentId++;
+    const timestamp = new Date();
+    const booking: Booking = { 
+      ...bookingData, 
+      id, 
+      createdAt: timestamp 
+    };
+    
+    this.bookings.set(id, booking);
+    return booking;
+  }
+  
+  async getBooking(id: number): Promise<Booking | undefined> {
+    return this.bookings.get(id);
+  }
+  
+  async getAllBookings(): Promise<Booking[]> {
+    return Array.from(this.bookings.values()).sort((a, b) => {
       // Sort by createdAt in descending order (newest first)
       const dateA = a.createdAt instanceof Date ? a.createdAt : new Date();
       const dateB = b.createdAt instanceof Date ? b.createdAt : new Date();

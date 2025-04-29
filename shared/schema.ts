@@ -41,3 +41,29 @@ export const contactMessageSchema = createInsertSchema(contactMessages).pick({
 
 export type ContactMessageInput = z.infer<typeof contactMessageSchema>;
 export type ContactMessage = typeof contactMessages.$inferSelect;
+
+// Bookings table
+export const bookings = pgTable("bookings", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  service: text("service").notNull(),
+  date: text("date").notNull(), // Store as text for simplicity
+  time: text("time").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Booking schema
+export const bookingSchema = createInsertSchema(bookings).pick({
+  name: true,
+  email: true,
+  service: true,
+  date: true,
+  time: true,
+}).extend({
+  email: z.string().email("Please enter a valid email"),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+});
+
+export type BookingInput = z.infer<typeof bookingSchema>;
+export type Booking = typeof bookings.$inferSelect;

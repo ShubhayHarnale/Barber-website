@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import type { Server } from "http";
 import { createServer } from "http";
 import { storage } from "./storage";
-import { contactMessageSchema } from "@shared/schema";
+import { contactMessageSchema, bookingSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
@@ -53,6 +53,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({
         success: false,
         message: "An error occurred while retrieving messages"
+      });
+    }
+  });
+  
+  // API endpoint to handle booking submissions
+  app.post("/api/bookings", async (req, res) => {
+    try {
+      // Validate the request body
+      const validatedData = bookingSchema.parse(req.body);
+      
+      // Store the booking
+      const booking = await storage.createBooking(validatedData);
+      
+      // Return success
+      return res.status(201).json({
+        success: true,
+        message: "Booking saved successfully",
+        data: { id: booking.id }
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({
+          success: false,
+          message: "Validation error",
+          errors: validationError.details
+        });
+      }
+      
+      console.error("Error saving booking:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while saving your booking"
+      });
+    }
+  });
+
+  // Get all bookings (for admin purposes)
+  app.get("/api/bookings", async (req, res) => {
+    try {
+      const bookings = await storage.getAllBookings();
+      return res.status(200).json({
+        success: true,
+        data: bookings
+      });
+    } catch (error) {
+      console.error("Error retrieving bookings:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while retrieving bookings"
       });
     }
   });

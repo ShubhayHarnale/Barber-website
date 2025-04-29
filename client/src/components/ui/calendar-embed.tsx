@@ -18,18 +18,38 @@ export function CalendarEmbed() {
   const [time, setTime] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleBook = () => {
-    setSubmitted(true);
-    setOpen(false);
+  const handleBook = async () => {
+    if (!date) return;
     
-    // Would typically send this data to a backend API
-    console.log({
-      name,
-      email,
-      service,
-      date: date ? format(date, "PPP") : "",
-      time
-    });
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          service,
+          date: format(date, "PPP"),
+          time
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setSubmitted(true);
+        setOpen(false);
+        console.log("Booking created with ID:", data.data.id);
+      } else {
+        console.error("Error creating booking:", data.message);
+        alert("There was an error saving your booking. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting booking:", error);
+      alert("There was an error saving your booking. Please try again.");
+    }
   };
 
   return (

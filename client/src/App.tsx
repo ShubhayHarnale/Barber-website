@@ -9,6 +9,7 @@ import Footer from "@/components/layout/Footer";
 import Home from "@/pages/Home";
 import Booking from "@/pages/Booking";
 import Contact from "@/pages/Contact";
+import Admin from "@/pages/Admin";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/booking" component={Booking} />
       <Route path="/contact" component={Contact} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );

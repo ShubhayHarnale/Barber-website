@@ -1,7 +1,8 @@
 import { 
   users, type User, type InsertUser, 
   contactMessages, type ContactMessage, type ContactMessageInput,
-  bookings, type Booking, type BookingInput
+  bookings, type Booking, type BookingInput,
+  type BarberSettings, type WorkingDaySettings
 } from "@shared/schema";
 
 // Interface for storage methods
@@ -22,12 +23,19 @@ export interface IStorage {
   deleteBooking(id: number): Promise<boolean>;
   isTimeSlotAvailable(date: string, time: string): Promise<boolean>;
   getBookedTimeSlots(date: string): Promise<string[]>;
+  
+  // Settings methods
+  getBarberSettings(): Promise<BarberSettings>;
+  updateBarberSettings(settings: BarberSettings): Promise<BarberSettings>;
+  isDayAvailable(dayOfWeek: number): Promise<boolean>;
+  getWorkingHours(): Promise<{startTime: string, endTime: string}>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private messages: Map<number, ContactMessage>;
   private bookings: Map<number, Booking>;
+  private settings: BarberSettings;
   private userCurrentId: number;
   private messageCurrentId: number;
   private bookingCurrentId: number;
@@ -36,6 +44,20 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.messages = new Map();
     this.bookings = new Map();
+    // Default settings - all weekdays available from 9am to 5pm
+    this.settings = {
+      workingDays: {
+        monday: true,
+        tuesday: true,
+        wednesday: true,
+        thursday: true,
+        friday: true,
+        saturday: true,
+        sunday: false,
+        startTime: "09:00",
+        endTime: "17:00"
+      }
+    };
     this.userCurrentId = 1;
     this.messageCurrentId = 1;
     this.bookingCurrentId = 1;
@@ -135,6 +157,29 @@ export class MemStorage implements IStorage {
       .map((booking) => booking.time);
     
     return bookedSlots;
+  }
+  
+  // Settings methods
+  async getBarberSettings(): Promise<BarberSettings> {
+    return this.settings;
+  }
+  
+  async updateBarberSettings(settings: BarberSettings): Promise<BarberSettings> {
+    this.settings = settings;
+    return this.settings;
+  }
+  
+  async isDayAvailable(dayOfWeek: number): Promise<boolean> {
+    // Always return true to make all days available
+    return true;
+  }
+  
+  async getWorkingHours(): Promise<{startTime: string, endTime: string}> {
+    // Return a wide range of hours to allow all times
+    return {
+      startTime: "00:00",
+      endTime: "23:00"
+    };
   }
 }
 

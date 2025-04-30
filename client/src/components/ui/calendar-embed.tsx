@@ -25,14 +25,81 @@ export function CalendarEmbed() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
   
-  // Barber's working days (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-  const workingDays = [2, 3, 4, 5, 6]; // Tuesday through Saturday
+  // State for barber's working days and hours (will be fetched from settings)
+  const [barberSettings, setBarberSettings] = useState({
+    workingDays: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: true,
+      sunday: false,
+      startTime: "09:00",
+      endTime: "17:00"
+    }
+  });
   
-  // Barber's working hours (10:00 AM to 5:00 PM)
-  const allTimeSlots = [
-    "10:00", "11:00", "12:00", "13:00",
-    "14:00", "15:00", "16:00", "17:00"
-  ];
+  // Generate time slots based on barber settings
+  const generateTimeSlots = () => {
+    const startHour = parseInt(barberSettings.workingDays.startTime.split(':')[0], 10);
+    const endHour = parseInt(barberSettings.workingDays.endTime.split(':')[0], 10);
+    
+    const slots = [];
+    // Generate all slots including the end hour
+    for (let hour = startHour; hour <= endHour; hour++) {
+      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+    }
+    return slots;
+  };
+  
+  // Get time slots based on barber's working hours
+  const allTimeSlots = generateTimeSlots();
+  
+  // Function to check if a day is a working day
+  const isDayAvailable = (dayOfWeek: number) => {
+    const dayMap: Record<number, string> = {
+      0: 'sunday',
+      1: 'monday',
+      2: 'tuesday',
+      3: 'wednesday',
+      4: 'thursday',
+      5: 'friday',
+      6: 'saturday'
+    };
+    
+    const day = dayMap[dayOfWeek];
+    return barberSettings.workingDays[day as keyof typeof barberSettings.workingDays] as boolean;
+  };
+
+  // Fetch barber settings
+  useEffect(() => {
+    const fetchBarberSettings = async () => {
+      try {
+        // Add a timestamp to prevent caching and ensure we're hitting the API
+        const response = await fetch('/api/settings?t=' + new Date().getTime(), {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          console.error(`Server responded with status: ${response.status}`);
+          return;
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          setBarberSettings(data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching barber settings:', err);
+      }
+    };
+    
+    fetchBarberSettings();
+  }, []);
   
   // Fetch booked time slots when date changes
   useEffect(() => {
@@ -130,8 +197,12 @@ export function CalendarEmbed() {
             <h3 className="font-heading text-xl font-bold mb-2">Select a Date</h3>
             <p className="text-gray-600 mb-4">Choose a date for your appointment</p>
             <div className="text-sm bg-muted/50 rounded-md p-3 text-muted-foreground">
-              <p><span className="font-medium">Working days:</span> Tuesday through Saturday</p>
-              <p><span className="font-medium">Working hours:</span> 10:00 AM to 5:00 PM</p>
+              <p><span className="font-medium">Working days:</span> {Object.entries(barberSettings.workingDays)
+                .filter(([key, value]) => key !== 'startTime' && key !== 'endTime' && value === true)
+                .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1))
+                .join(', ')}
+              </p>
+              <p><span className="font-medium">Working hours:</span> {barberSettings.workingDays.startTime} to {barberSettings.workingDays.endTime}</p>
             </div>
           </div>
 
@@ -140,6 +211,7 @@ export function CalendarEmbed() {
               mode="single"
               selected={date}
               onSelect={handleDateChange}
+              showOutsideDays={false}
               disabled={(date) => {
                 // Disable dates in the past
                 if (date < new Date()) return true;
@@ -147,9 +219,9 @@ export function CalendarEmbed() {
                 // Disable dates more than 2 months in the future
                 if (date > new Date(new Date().setMonth(new Date().getMonth() + 2))) return true;
                 
-                // Disable days that are not working days (Tuesday-Saturday)
+                // Disable days that are not working days based on barber settings
                 const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
-                return !workingDays.includes(dayOfWeek);
+                return !isDayAvailable(dayOfWeek);
               }}
               className="rounded-md border"
             />

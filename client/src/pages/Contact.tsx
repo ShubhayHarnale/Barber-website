@@ -27,7 +27,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h4 className="font-medium mb-1">Address</h4>
-                      <p className="text-gray-600">123 Main Street, Suite 101<br />New York, NY 10001</p>
+                      <p className="text-gray-600">Center Grove Rd<br />Randolph, NJ 07869<br />Located near Weis Markets and Wonder Randolph</p>
                     </div>
                   </div>
                   
@@ -58,9 +58,8 @@ export default function Contact() {
                     <div>
                       <h4 className="font-medium mb-1">Hours</h4>
                       <p className="text-gray-600">
-                        Monday - Friday: 9:00 AM - 7:00 PM<br />
-                        Saturday: 10:00 AM - 5:00 PM<br />
-                        Sunday: Closed
+                      See available hours in booking calendar
+
                       </p>
                     </div>
                   </div>
@@ -73,7 +72,7 @@ export default function Contact() {
                       asChild
                       className="bg-[#3D95CE] hover:bg-opacity-90 transition-colors duration-200"
                     >
-                      <a href="https://venmo.com" target="_blank" rel="noopener noreferrer" className="flex items-center">
+                      <a href="https://account.venmo.com/u/Geraldo-Vazquez" target="_blank" rel="noopener noreferrer" className="flex items-center">
                         <CreditCard className="mr-2 h-4 w-4" /> Venmo
                       </a>
                     </Button>

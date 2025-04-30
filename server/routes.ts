@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import type { Server } from "http";
 import { createServer } from "http";
 import { storage } from "./storage";
-import { contactMessageSchema, bookingSchema } from "@shared/schema";
+import { contactMessageSchema, bookingSchema, barberSettingsSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
@@ -67,25 +67,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the request body
       const validatedData = bookingSchema.parse(req.body);
       
-      // Check if the selected date is a working day (Tuesday-Saturday)
+      // Check if the selected date is a working day based on settings
       const dateObj = new Date(validatedData.date);
       const dayOfWeek = dateObj.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const workingDays = [2, 3, 4, 5, 6]; // Tuesday through Saturday
+      const isDayAvailable = await storage.isDayAvailable(dayOfWeek);
       
-      if (!workingDays.includes(dayOfWeek)) {
+      if (!isDayAvailable) {
         return res.status(400).json({
           success: false,
-          message: "Selected date is not a working day. We are open Tuesday through Saturday."
+          message: "Selected date is not a working day based on the barber's schedule."
         });
       }
       
-      // Check if the selected time is during working hours (10:00 AM to 5:00 PM)
-      const workingHours = ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+      // Check if the selected time is during working hours based on settings
+      const workingHours = await storage.getWorkingHours();
+      const selectedTime = parseInt(validatedData.time.split(':')[0], 10);
+      const startHour = parseInt(workingHours.startTime.split(':')[0], 10);
+      const endHour = parseInt(workingHours.endTime.split(':')[0], 10);
       
-      if (!workingHours.includes(validatedData.time)) {
+      if (selectedTime < startHour || selectedTime >= endHour) {
         return res.status(400).json({
           success: false,
-          message: "Selected time is outside working hours. We are open from 10:00 AM to 5:00 PM."
+          message: `Selected time is outside working hours. We are open from ${workingHours.startTime} to ${workingHours.endTime}.`
         });
       }
       
@@ -126,10 +129,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all bookings (for admin purposes)
+  // Get all bookings (for admin dashboard)
   apiRouter.get("/bookings", async (req, res) => {
     try {
       const bookings = await storage.getAllBookings();
+      
       return res.status(200).json({
         success: true,
         data: bookings
@@ -177,20 +181,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get booked time slots for a specific date
+  // Get available time slots for a specific date
   apiRouter.get("/bookings/slots/:date", async (req, res) => {
     try {
       const date = req.params.date;
       
-      // Check if the selected date is a working day (Tuesday-Saturday)
+      // Check if the selected date is a working day based on settings
       const dateObj = new Date(date);
       const dayOfWeek = dateObj.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const workingDays = [2, 3, 4, 5, 6]; // Tuesday through Saturday
+      const isDayAvailable = await storage.isDayAvailable(dayOfWeek);
       
-      if (!workingDays.includes(dayOfWeek)) {
+      if (!isDayAvailable) {
         return res.status(400).json({
           success: false,
-          message: "Selected date is not a working day. We are open Tuesday through Saturday."
+          message: "Selected date is not a working day based on the barber's schedule."
         });
       }
       
@@ -221,25 +225,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if the selected date is a working day (Tuesday-Saturday)
+      // Check if the selected date is a working day based on settings
       const dateObj = new Date(date as string);
       const dayOfWeek = dateObj.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const workingDays = [2, 3, 4, 5, 6]; // Tuesday through Saturday
+      const isDayAvailable = await storage.isDayAvailable(dayOfWeek);
       
-      if (!workingDays.includes(dayOfWeek)) {
+      if (!isDayAvailable) {
         return res.status(400).json({
           success: false,
-          message: "Selected date is not a working day. We are open Tuesday through Saturday."
+          message: "Selected date is not a working day based on the barber's schedule."
         });
       }
       
-      // Check if the selected time is during working hours (10:00 AM to 5:00 PM)
-      const workingHours = ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+      // Check if the selected time is during working hours based on settings
+      const workingHours = await storage.getWorkingHours();
+      const selectedTime = parseInt((time as string).split(':')[0], 10);
+      const startHour = parseInt(workingHours.startTime.split(':')[0], 10);
+      const endHour = parseInt(workingHours.endTime.split(':')[0], 10);
       
-      if (!workingHours.includes(time as string)) {
+      if (selectedTime < startHour || selectedTime >= endHour) {
         return res.status(400).json({
           success: false,
-          message: "Selected time is outside working hours. We are open from 10:00 AM to 5:00 PM."
+          message: `Selected time is outside working hours. We are open from ${workingHours.startTime} to ${workingHours.endTime}.`
         });
       }
       
@@ -254,6 +261,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({
         success: false,
         message: "An error occurred while checking time slot availability"
+      });
+    }
+  });
+
+  // Get barber settings
+  apiRouter.get("/settings", async (req, res) => {
+    try {
+      const settings = await storage.getBarberSettings();
+      
+      return res.status(200).json({
+        success: true,
+        data: settings
+      });
+    } catch (error) {
+      console.error("Error retrieving barber settings:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while retrieving barber settings"
+      });
+    }
+  });
+
+  // Update barber settings
+  apiRouter.post("/settings", async (req, res) => {
+    try {
+      // Validate the request body
+      const validatedData = barberSettingsSchema.parse(req.body);
+      
+      // Update the settings
+      const updatedSettings = await storage.updateBarberSettings(validatedData);
+      
+      return res.status(200).json({
+        success: true,
+        message: "Settings updated successfully",
+        data: updatedSettings
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({
+          success: false,
+          message: "Validation error",
+          errors: validationError.details
+        });
+      }
+      
+      console.error("Error updating barber settings:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while updating barber settings"
       });
     }
   });

@@ -67,3 +67,23 @@ export const bookingSchema = createInsertSchema(bookings).pick({
 
 export type BookingInput = z.infer<typeof bookingSchema>;
 export type Booking = typeof bookings.$inferSelect;
+
+// Settings schema
+export const workingDaySettingsSchema = z.object({
+  monday: z.boolean().default(false),
+  tuesday: z.boolean().default(false),
+  wednesday: z.boolean().default(false),
+  thursday: z.boolean().default(false),
+  friday: z.boolean().default(false),
+  saturday: z.boolean().default(false),
+  sunday: z.boolean().default(false),
+  startTime: z.string().default("09:00"),
+  endTime: z.string().default("17:00"),
+});
+
+export const barberSettingsSchema = z.object({
+  workingDays: workingDaySettingsSchema,
+});
+
+export type WorkingDaySettings = z.infer<typeof workingDaySettingsSchema>;
+export type BarberSettings = z.infer<typeof barberSettingsSchema>;

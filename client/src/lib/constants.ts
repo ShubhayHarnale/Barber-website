@@ -1,26 +1,33 @@
-import { Scissors, PencilRuler, Droplets } from "lucide-react";
+import { Scissors, PencilRuler } from "lucide-react";
 
 export const services = [
   {
     id: 1,
     title: "Haircut",
     description: "Precision cuts tailored to your style and face shape.",
-    price: "$30",
+    price: "$45",
     icon: Scissors
   },
   {
     id: 2,
     title: "Beard Trim",
     description: "Professional beard shaping and maintenance.",
-    price: "$20",
+    price: "$25",
     icon: PencilRuler
   },
   {
     id: 3,
-    title: "Hot Towel Shave",
-    description: "Classic hot towel shave for the ultimate experience.",
-    price: "$35",
-    icon: Droplets
+    title: "Shape up",
+    description: "Clean and precise edge-up for your hairline, sideburns, and neckline to maintain a fresh look.",
+    price: "$20",
+    icon: PencilRuler
+  },
+  {
+    id: 4,
+    title: "Haircut & Beard Trim",
+    description: "Complete grooming package including a precision haircut and professional beard shaping for a polished look.",
+    price: "$60",
+    icon: PencilRuler
   }
 ];
 
@@ -46,6 +53,6 @@ export const contactInfo = {
 };
 
 export const paymentLinks = {
-  venmo: "https://venmo.com",
+  venmo: "https://account.venmo.com/u/Geraldo-Vazquez",
   zelle: "https://www.zellepay.com/"
 };

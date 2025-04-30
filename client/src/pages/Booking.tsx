@@ -7,7 +7,7 @@ export default function Booking() {
         <div className="text-center mb-12">
           <h2 className="font-heading text-3xl font-bold mb-4">Book Your Appointment</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Select your preferred service and time slot to schedule your next appointment at Sharp Cuts.
+            Select your preferred service and time slot to schedule your next appointment at Joel Cuts.
           </p>
         </div>
         

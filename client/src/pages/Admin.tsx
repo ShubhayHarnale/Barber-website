@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SettingsForm from "@/components/admin/SettingsForm";
 
 interface Booking {
   id: number;
@@ -121,71 +123,84 @@ export default function Admin() {
       <Card className="mb-8">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Admin Dashboard</CardTitle>
-          <CardDescription>View all appointment bookings</CardDescription>
+          <CardDescription>Manage your barbershop</CardDescription>
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Bookings</CardTitle>
-          <CardDescription>Total: {bookings.length} bookings</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : error ? (
-            <div className="py-8 text-center text-red-500">{error}</div>
-          ) : bookings.length === 0 ? (
-            <div className="py-8 text-center text-gray-500">No bookings found</div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Submitted At</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {bookings.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell className="font-medium">{booking.name}</TableCell>
-                      <TableCell>{booking.email}</TableCell>
-                      <TableCell>{getServiceName(booking.service)}</TableCell>
-                      <TableCell>{formatDate(booking.date)}</TableCell>
-                      <TableCell>{booking.time}</TableCell>
-                      <TableCell>{formatTimestamp(booking.createdAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteBooking(booking.id)}
-                          disabled={deletingId === booking.id}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          {deletingId === booking.id ? (
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                          <span className="sr-only">Delete booking</span>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="bookings" className="mb-8">
+        <TabsList className="grid w-full md:w-auto grid-cols-2">
+          <TabsTrigger value="bookings">Bookings</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="bookings">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Bookings</CardTitle>
+              <CardDescription>Total: {bookings.length} bookings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                </div>
+              ) : error ? (
+                <div className="py-8 text-center text-red-500">{error}</div>
+              ) : bookings.length === 0 ? (
+                <div className="py-8 text-center text-gray-500">No bookings found</div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Service</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Time</TableHead>
+                        <TableHead>Submitted At</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {bookings.map((booking) => (
+                        <TableRow key={booking.id}>
+                          <TableCell className="font-medium">{booking.name}</TableCell>
+                          <TableCell>{booking.email}</TableCell>
+                          <TableCell>{getServiceName(booking.service)}</TableCell>
+                          <TableCell>{formatDate(booking.date)}</TableCell>
+                          <TableCell>{booking.time}</TableCell>
+                          <TableCell>{formatTimestamp(booking.createdAt)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteBooking(booking.id)}
+                              disabled={deletingId === booking.id}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              {deletingId === booking.id ? (
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                              <span className="sr-only">Delete booking</span>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="settings">
+          <SettingsForm />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

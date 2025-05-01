@@ -10,13 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { services } from "@/lib/constants";
 
 export function CalendarEmbed() {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [service, setService] = useState("haircut");
+  const [service, setService] = useState("");
   const [time, setTime] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [bookedTimeSlots, setBookedTimeSlots] = useState<string[]>([]);
@@ -55,6 +56,15 @@ export function CalendarEmbed() {
   
   // Get time slots based on barber's working hours
   const allTimeSlots = generateTimeSlots();
+  
+  // Convert 24h time format to 12h format
+  const formatTimeToStandard = (time: string): string => {
+    const hour = parseInt(time.split(':')[0], 10);
+    const minutes = time.split(':')[1];
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const standardHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${standardHour}:${minutes} ${period}`;
+  };
   
   // Function to check if a day is a working day
   const isDayAvailable = (dayOfWeek: number) => {
@@ -240,7 +250,6 @@ export function CalendarEmbed() {
           {submitted && (
             <div className="mt-6 p-4 bg-green-50 text-green-800 rounded-md">
               <p className="font-medium">Booking request sent!</p>
-              <p className="text-sm">We'll confirm your appointment via email shortly.</p>
             </div>
           )}
         </div>
@@ -292,10 +301,11 @@ export function CalendarEmbed() {
                   <SelectValue placeholder="Select a service" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="haircut">Haircut ($30)</SelectItem>
-                  <SelectItem value="beardtrim">Beard Trim ($20)</SelectItem>
-                  <SelectItem value="shave">Hot Towel Shave ($35)</SelectItem>
-                  <SelectItem value="combo">Haircut & Beard Trim ($45)</SelectItem>
+                  {services.map((serviceItem) => (
+                    <SelectItem key={serviceItem.id} value={serviceItem.title.toLowerCase().replace(/\s+/g, '')}>
+                      {serviceItem.title} ({serviceItem.price})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -319,9 +329,7 @@ export function CalendarEmbed() {
                         value={timeSlot}
                         disabled={bookedTimeSlots.includes(timeSlot)}
                       >
-                        {parseInt(timeSlot) < 12 
-                          ? `${timeSlot} AM` 
-                          : `${parseInt(timeSlot) === 12 ? '12:00' : (parseInt(timeSlot) - 12) + ':00'} PM`}
+                        {formatTimeToStandard(timeSlot)}
                         {bookedTimeSlots.includes(timeSlot) && " (Booked)"}
                       </SelectItem>
                     ))}

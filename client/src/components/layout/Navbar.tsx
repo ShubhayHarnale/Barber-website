@@ -41,7 +41,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 font-heading text-xl font-bold">
-              JOEL CUTS
+              JOEL'S BARBER LOUNGE
             </Link>
           </div>
           

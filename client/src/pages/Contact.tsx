@@ -10,7 +10,7 @@ export default function Contact() {
         <div className="text-center mb-12">
           <h2 className="font-heading text-3xl font-bold mb-4">Contact Us</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Have questions or need assistance? Reach out to us using any of the methods below.
+            Have questions or need assistance? Reach out to Joel's Barber Lounge using any of the methods below.
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h4 className="font-medium mb-1">Email</h4>
-                      <p className="text-gray-600">info@sharpcuts.com</p>
+                      <p className="text-gray-600">info@joelsbarbershop.com</p>
                     </div>
                   </div>
                   

@@ -12,6 +12,15 @@ const timeOptions = [
   "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
 ];
 
+// Convert 24h time format to 12h format
+const formatTimeToStandard = (time: string): string => {
+  const hour = parseInt(time.split(':')[0], 10);
+  const minutes = time.split(':')[1];
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const standardHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${standardHour}:${minutes} ${period}`;
+};
+
 const days = [
   { id: "monday", label: "Monday" },
   { id: "tuesday", label: "Tuesday" },
@@ -158,7 +167,7 @@ export default function SettingsForm() {
       <Card>
         <CardHeader>
           <CardTitle>Working Hours Settings</CardTitle>
-          <CardDescription>Configure your availability</CardDescription>
+          <CardDescription>Configure Joel's Barber Lounge availability</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex justify-center py-8">
@@ -173,7 +182,7 @@ export default function SettingsForm() {
     <Card>
       <CardHeader>
         <CardTitle>Working Hours Settings</CardTitle>
-        <CardDescription>Configure your availability</CardDescription>
+        <CardDescription>Configure Joel's Barber Lounge availability</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -210,7 +219,7 @@ export default function SettingsForm() {
                   <SelectContent>
                     {timeOptions.map((time) => (
                       <SelectItem key={`start-${time}`} value={time}>
-                        {time}
+                        {formatTimeToStandard(time)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -229,7 +238,7 @@ export default function SettingsForm() {
                   <SelectContent>
                     {timeOptions.map((time) => (
                       <SelectItem key={`end-${time}`} value={time}>
-                        {time}
+                        {formatTimeToStandard(time)}
                       </SelectItem>
                     ))}
                   </SelectContent>

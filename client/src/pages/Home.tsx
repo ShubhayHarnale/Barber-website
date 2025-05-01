@@ -42,15 +42,15 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 pb-8">
         <div className="md:flex md:items-center md:gap-12">
           <div className="md:w-1/2 mb-8 md:mb-0">
-            <h2 className="font-heading text-3xl font-bold mb-4">About Joel Cuts</h2>
+            <h2 className="font-heading text-3xl font-bold mb-4">About Joel's Barber Lounge</h2>
             <p className="mb-4">
-              Founded in 2015, Joel Cuts has established itself as the premier destination for quality haircuts and grooming services. With a commitment to excellence and attention to detail, we've built a loyal clientele who trust us with their style.
+            Welcome to Joel’s barber studio, your go-to barbershop studio for top-quality haircuts and grooming.
             </p>
             <p className="mb-4">
-              Our expert barbers combine traditional techniques with modern styles to deliver an exceptional experience for every client. Each member of our team undergoes rigorous training and stays current with the latest trends and techniques in men's grooming.
+            As the proud owner and sole barber, I take personal pride in providing a consistent and customized, one-on-one experience tailored just for you.
             </p>
             <p className="mb-6">
-              At Joel Cuts, we believe that a great haircut is more than just a service—it's an experience. From the moment you walk in, you'll enjoy our relaxed atmosphere, complimentary beverages, and personalized consultations to ensure you get exactly the look you want.
+            Step into a space where tradition meets modern style, and let’s create the perfect look together.
             </p>
             <div className="flex items-center">
               <a 

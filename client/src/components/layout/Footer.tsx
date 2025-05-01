@@ -8,9 +8,8 @@ export default function Footer() {
         <div className="md:flex md:justify-between">
           <div className="mb-6 md:mb-0">
             <Link href="/" className="font-heading text-xl font-bold">
-              JOEL CUTS
+              JOEL'S BARBER LOUNGE
             </Link>
-            <p className="mt-2 text-sm text-gray-300">Premium barbershop services since 2015</p>
           </div>
           
           <div className="grid grid-cols-2 gap-8 md:gap-12">
@@ -53,7 +52,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-8 pt-8 border-t border-gray-700 md:flex md:items-center md:justify-between">
-          <p className="text-sm text-gray-300">&copy; {new Date().getFullYear()} Joel Cuts. All rights reserved.</p>
+          <p className="text-sm text-gray-300">&copy; {new Date().getFullYear()} Joel's Barber Lounge. All rights reserved.</p>
           <div className="mt-4 md:mt-0">
             <ul className="flex space-x-6">
               <li>

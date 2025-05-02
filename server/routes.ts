@@ -85,7 +85,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const startHour = parseInt(workingHours.startTime.split(':')[0], 10);
       const endHour = parseInt(workingHours.endTime.split(':')[0], 10);
       
-      if (selectedTime < startHour || selectedTime >= endHour) {
+      // Fix: Allow booking at the endHour (e.g., 20:00 if endHour is 20)
+      if (selectedTime < startHour || selectedTime > endHour) {
         return res.status(400).json({
           success: false,
           message: `Selected time is outside working hours. We are open from ${workingHours.startTime} to ${workingHours.endTime}.`
@@ -243,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const startHour = parseInt(workingHours.startTime.split(':')[0], 10);
       const endHour = parseInt(workingHours.endTime.split(':')[0], 10);
       
-      if (selectedTime < startHour || selectedTime >= endHour) {
+      if (selectedTime < startHour || selectedTime > endHour) {
         return res.status(400).json({
           success: false,
           message: `Selected time is outside working hours. We are open from ${workingHours.startTime} to ${workingHours.endTime}.`

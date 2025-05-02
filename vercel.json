@@ -1,20 +1,13 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/client/dist/$1" }
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/public",
+  "rewrites": [
+    { "source": "/api/bookings", "destination": "/api/bookings" },
+    { "source": "/api/bookings/:id", "destination": "/api/bookings" },
+    { "source": "/api/bookings/slots/:date", "destination": "/api/bookings" },
+    { "source": "/api/contact", "destination": "/api/contact" },
+    { "source": "/api/settings", "destination": "/api/settings" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

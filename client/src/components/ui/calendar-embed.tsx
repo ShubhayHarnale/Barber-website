@@ -124,7 +124,12 @@ export function CalendarEmbed() {
         const data = await response.json();
         
         if (data.success) {
-          setBookedTimeSlots(data.data);
+          // Extract just the time slots from the booking objects
+          const bookedSlots = data.data
+            .filter((booking: any) => booking.date === formattedDate)
+            .map((booking: any) => booking.time);
+          
+          setBookedTimeSlots(bookedSlots);
           setTime(""); // Reset time selection when date changes
         } else {
           console.error("Error fetching booked time slots:", data.message);

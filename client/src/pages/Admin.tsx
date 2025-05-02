@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SettingsForm from "@/components/admin/SettingsForm";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/lib/auth-context";
 
 interface Booking {
   id: number;
@@ -25,11 +26,18 @@ export default function Admin() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/bookings');
+      const token = await user?.access_token;
+      const response = await fetch('/api/bookings', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -53,8 +61,13 @@ export default function Admin() {
   const handleDeleteBooking = async (id: number) => {
     try {
       setDeletingId(id);
+      const token = await user?.access_token;
       const response = await fetch(`/api/bookings/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
       });
       
       const data = await response.json();

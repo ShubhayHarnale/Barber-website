@@ -5,6 +5,45 @@ import { storage } from "./supabase-storage";
 import { contactMessageSchema, bookingSchema, barberSettingsSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { supabaseAdmin } from "./lib/supabase-admin";
+
+// Middleware to check if the user is authenticated
+async function requireAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+  // Get the token from the Authorization header
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized - Missing or invalid token'
+    });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    // Verify the JWT token with Supabase
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized - Invalid token'
+      });
+    }
+
+    // Add the user to the request for later use
+    (req as any).user = user;
+    
+    // Continue to the next middleware or route handler
+    next();
+  } catch (error) {
+    console.error('Auth error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error during authentication'
+    });
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create a dedicated router for API endpoints to ensure they take precedence
@@ -130,8 +169,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all bookings (for admin dashboard)
-  apiRouter.get("/bookings", async (req, res) => {
+  // Get all bookings (for admin dashboard) - PROTECTED
+  apiRouter.get("/bookings", requireAuth, async (req, res) => {
     try {
       const bookings = await storage.getAllBookings();
       
@@ -148,8 +187,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete a booking
-  apiRouter.delete("/bookings/:id", async (req, res) => {
+  // Delete a booking - PROTECTED
+  apiRouter.delete("/bookings/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
       
@@ -284,8 +323,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update barber settings
-  apiRouter.post("/settings", async (req, res) => {
+  // Update barber settings - PROTECTED
+  apiRouter.post("/settings", requireAuth, async (req, res) => {
     try {
       // Validate the request body
       const validatedData = barberSettingsSchema.parse(req.body);

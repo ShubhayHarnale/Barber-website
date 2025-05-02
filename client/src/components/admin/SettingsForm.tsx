@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
 import { type WorkingDaySettings, type BarberSettings } from "@shared/schema";
 
 const timeOptions = [
@@ -49,14 +50,17 @@ export default function SettingsForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         setLoading(true);
         // Add a timestamp to prevent caching and ensure we're hitting the API
+        const token = await user?.access_token;
         const response = await fetch('/api/settings?t=' + new Date().getTime(), {
           headers: {
+            'Authorization': `Bearer ${token}`,
             'Accept': 'application/json'
           }
         });
@@ -89,7 +93,7 @@ export default function SettingsForm() {
     };
 
     fetchSettings();
-  }, [toast]);
+  }, [toast, user]);
 
   const handleDayChange = (day: keyof WorkingDaySettings, checked: boolean) => {
     setSettings(prev => ({
@@ -128,9 +132,11 @@ export default function SettingsForm() {
         return;
       }
       
+      const token = await user?.access_token;
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(settings),

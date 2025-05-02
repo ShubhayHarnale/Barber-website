@@ -3,11 +3,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/public",
   "rewrites": [
-    { "source": "/api/bookings", "destination": "/api/bookings.js" },
-    { "source": "/api/bookings/:id", "destination": "/api/bookings.js" },
-    { "source": "/api/bookings/slots/:date", "destination": "/api/bookings.js" },
-    { "source": "/api/contact", "destination": "/api/contact.js" },
-    { "source": "/api/settings", "destination": "/api/settings.js" },
+    { "source": "/api/bookings", "destination": "/api/bookings" },
+    { "source": "/api/bookings/:id", "destination": "/api/bookings" },
+    { "source": "/api/bookings/slots/:date", "destination": "/api/bookings" },
+    { "source": "/api/contact", "destination": "/api/contact" },
+    { "source": "/api/settings", "destination": "/api/settings" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

@@ -10,9 +10,6 @@ import Home from "@/pages/Home";
 import Booking from "@/pages/Booking";
 import Contact from "@/pages/Contact";
 import Admin from "@/pages/Admin";
-import Login from "@/pages/Login";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import { AuthProvider } from "@/lib/auth-context";
 
 function Router() {
   return (
@@ -20,14 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/booking" component={Booking} />
       <Route path="/contact" component={Contact} />
-      <Route path="/login" component={Login} />
-      <Route path="/admin">
-        {() => (
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        )}
-      </Route>
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -36,18 +26,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-grow">
-              <Router />
-            </main>
-            <Footer />
-            <Toaster />
-          </div>
-        </TooltipProvider>
-      </AuthProvider>
+      <TooltipProvider>
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
+          <main className="flex-grow">
+            <Router />
+          </main>
+          <Footer />
+          <Toaster />
+        </div>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

@@ -1,7 +1,7 @@
 import express, { type Express } from "express";
 import type { Server } from "http";
 import { createServer } from "http";
-import { storage } from "./storage";
+import { storage } from "./supabase-storage";
 import { contactMessageSchema, bookingSchema, barberSettingsSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";

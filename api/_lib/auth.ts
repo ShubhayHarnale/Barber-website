@@ -5,7 +5,7 @@ import { supabase } from './supabase';
 export async function requireAuth(
   req: VercelRequest,
   res: VercelResponse,
-  next: () => Promise<void>
+  next: () => Promise<void | VercelResponse>
 ) {
   // Get the token from the Authorization header
   const authHeader = req.headers.authorization;
@@ -45,11 +45,11 @@ export async function requireAuth(
 
 // Helper function to create a protected API handler
 export function createProtectedHandler(
-  handler: (req: VercelRequest, res: VercelResponse) => Promise<void>
+  handler: (req: VercelRequest, res: VercelResponse) => Promise<void | VercelResponse>
 ) {
   return async (req: VercelRequest, res: VercelResponse) => {
-    await requireAuth(req, res, async () => {
-      await handler(req, res);
+    return await requireAuth(req, res, async () => {
+      return await handler(req, res);
     });
   };
 }

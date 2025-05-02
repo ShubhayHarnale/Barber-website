@@ -14,6 +14,12 @@
     }
   ],
   "routes": [
+    { "src": "/api/settings", "dest": "/api/settings.ts" },
+    { "src": "/api/bookings/slots/(?<date>[^/]+)", "dest": "/api/bookings.ts?slots=true&date=$date" },
+    { "src": "/api/bookings/availability", "dest": "/api/bookings.ts?availability=true" },
+    { "src": "/api/bookings/([0-9]+)", "dest": "/api/bookings.ts?id=$1" },
+    { "src": "/api/bookings", "dest": "/api/bookings.ts" },
+    { "src": "/api/contact", "dest": "/api/contact.ts" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|svg|webp))", "dest": "/dist/public/$1" },
     { "src": "/(.*)", "dest": "/dist/public/index.html" }

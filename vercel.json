@@ -1,35 +1,6 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.ts",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|svg|webp))",
-      "dest": "/client/dist/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/client/dist/index.html"
-    }
-  ],
-  "env": {
-    "SUPABASE_URL": "https://ucgmttkscdxckdncnhcd.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_URL": "https://ucgmttkscdxckdncnhcd.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjZ210dGtzY2R4Y2tkbmNuaGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTQ5NjI2NTgsImV4cCI6MjAzMDUzODY1OH0.OPqsNVHmRYQfQqXfzAD3f-_VQlTFQFvAJOI9oQwJLYQ"
-  }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

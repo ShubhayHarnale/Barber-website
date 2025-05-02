@@ -119,8 +119,8 @@ export function CalendarEmbed() {
       setLoading(true);
       setErrorMessage(null);
       try {
-        const formattedDate = format(date, "yyyy-MM-dd"); // Format date as YYYY-MM-DD
-        const response = await fetch(`/api/bookings?slots=true&date=${formattedDate}`); // Use query parameter
+        const formattedDate = format(date, "yyyy-MM-dd");
+        const response = await fetch(`/api/bookings?slots=true&date=${encodeURIComponent(formattedDate)}`);
         const data = await response.json();
         
         if (data.success) {
@@ -165,7 +165,7 @@ export function CalendarEmbed() {
           name,
           email,
           service,
-          date: format(date, "PPP"),
+          date: format(date, "yyyy-MM-dd"),
           time
         })
       });

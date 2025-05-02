@@ -25,7 +25,13 @@ async function settingsHandler(req: VercelRequest, res: VercelResponse) {
         .select('*')
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'An error occurred while fetching barber settings'
+        });
+      }
       
       return res.status(200).json({
         success: true,
@@ -56,7 +62,13 @@ async function settingsHandler(req: VercelRequest, res: VercelResponse) {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'An error occurred while updating barber settings'
+        });
+      }
       
       return res.status(200).json({
         success: true,

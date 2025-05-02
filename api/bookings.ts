@@ -138,39 +138,7 @@ async function bookingsHandler(req: VercelRequest, res: VercelResponse) {
           message: 'Invalid date format'
         });
       }
-  
-      // Get barber settings to check if day is available
-      const { data: settingsData, error: settingsError } = await supabase
-        .from('barber_settings')
-        .select('*')
-        .single();
       
-      if (settingsError) {
-        throw settingsError;
-      }
-  
-      // Check if the day is a working day
-      const dayOfWeek = dateObj.getDay();
-      const dayMap: Record<number, string> = {
-        0: 'sunday',
-        1: 'monday',
-        2: 'tuesday',
-        3: 'wednesday',
-        4: 'thursday',
-        5: 'friday',
-        6: 'saturday'
-      };
-      
-      const day = dayMap[dayOfWeek];
-      const isDayAvailable = settingsData.working_days[day];
-      
-      if (!isDayAvailable) {
-        return res.status(400).json({
-          success: false,
-          message: 'Selected date is not a working day based on the barber\'s schedule.'
-        });
-      }
-  
       // Get booked slots for the date
       const { data: bookedSlots, error } = await supabase
         .from('bookings')
@@ -178,9 +146,13 @@ async function bookingsHandler(req: VercelRequest, res: VercelResponse) {
         .eq('date', date);
       
       if (error) {
-        throw error;
+        console.error('Supabase error:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'An error occurred while retrieving booked time slots'
+        });
       }
-  
+      
       return res.status(200).json({
         success: true,
         data: bookedSlots.map(slot => slot.time)
